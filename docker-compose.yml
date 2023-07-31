@@ -1,0 +1,47 @@
+version: '3.7'  #用于指定 Docker Compose 的版本。
+
+services:  #定义了需要运行应用的所有服务。
+
+  web:  #第一个服务是 web 应用。
+    platform: linux/amd64
+    build:   #构建 Docker 镜像的相关设置。
+        context: .  #构建上下文路径，此处为当前目录。
+        dockerfile: App.Dockerfile  #指定 Dockerfile 名称。
+    image: yiranlater/general_blog_per_2023_07_31_2:03
+    restart: always  #如果容器退出，则Docker自动重启容器。
+    command: ["/usr/wait-for-it.sh", "db:3306", "--", "npm", "start"]
+    volumes:   #定义了数据卷。
+      - .:/usr/src/app  #映射当前目录到容器的 /app 目录。
+      - /usr/src/app/node_modules  #node_modules 目录使用匿名卷。
+    ports:  #端口映射。
+      - 3005:3005  #将主机的 3005 端口映射到容器的 3005 端口。
+    depends_on:  #定义依赖服务，即该服务在 "db" 服务启动后再启动。
+      - db
+    networks:  #将 web 服务连接到 general_blog_per_default 网络
+      - general_blog_per_default
+    environment:
+      - NODE_ENV=development
+  db:    #第二个服务是 MySQL 数据库。
+    image: mysql@sha256:1da5cf22e7177925fa4d2a707936ca4ade59ba10b40b23550b0ffc12f8340600 
+    # image: mysql@sha256:c589deae89d660f907875ca7ac419f0704fc20f6d3825329b585ee2402b35101  #使用具有特定 sha256 哈希的 mysql 镜像(arm64平台)。
+    restart: always  #如果容器退出，则Docker自动重启容器。
+    environment:  #设定环境变量。
+      MYSQL_ROOT_PASSWORD: root  #MySQL root 用户的密码。
+      MYSQL_DATABASE: generalBlogs  # 可选：初始数据库名称
+      # MYSQL_USER: yiran  # 可选：新用户名称
+      # MYSQL_PASSWORD: yiran52  # 可选：新用户密码
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql  #将名为 db_data 的卷挂载到容器的 /var/lib/mysql 目录，使数据库数据持久化。
+    command: --default-authentication-plugin=mysql_native_password 
+    networks:  #将 db 服务连接到 general_blog_per_default 网络
+      - general_blog_per_default
+
+volumes:  #根级别的卷定义。
+  db_data:  #创建一个名为 db_data 的 Docker 卷。
+
+networks:  #根级别的网络定义。
+  general_blog_per_default:  #使用已存在的 general_blog_per_default Docker 网络
+    external: true
+
+
