@@ -3,7 +3,7 @@ version: '3.7'  #用于指定 Docker Compose 的版本。
 services:  #定义了需要运行应用的所有服务。
 
   web:  #第一个服务是 web 应用。
-    platform: linux/amd64
+    #platform: linux/amd64 打包amd64的镜像时使用
     build:   #构建 Docker 镜像的相关设置。
         context: .  #构建上下文路径，此处为当前目录。
         dockerfile: App.Dockerfile  #指定 Dockerfile 名称。

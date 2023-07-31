@@ -19,7 +19,7 @@ docker system prune --all --force --volumes
 docker network create general_blog_per_default
 docker-compose -f docker-compose.yml up --build //这将构建并打开你的项目
     
-//构建多平台是使用-在docker-compose.yml中配置platform: linux/amd64打包amd64的应用
+//构建多平台时使用-在docker-compose.yml中配置platform: linux/amd64打包amd64的应用
 - vim ~/.docker/config.json
 - 添加"experimental": "enabled"
 - DOCKER_CLI_EXPERIMENTAL=enabled docker-compose up --build
